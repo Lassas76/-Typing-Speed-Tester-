@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SpeedType — Typing Speed Tester</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #fceabb, #f8b500);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+      padding: 2rem;
+      max-width: 600px;
+      width: 90%;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    .sentence {
+      font-size: 1.2rem;
+      margin: 1rem 0;
+      padding: 1rem;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      background: #f9f9f9;
+    }
+
+    .input-area {
+      width: 100%;
+      padding: 1rem;
+      font-size: 1.1rem;
+      margin: 1rem 0;
+      border-radius: 8px;
+      border: 2px solid #bbb;
+    }
+
+    .input-area:disabled {
+      background: #eee;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+
+    button {
+      padding: 0.6rem 1.2rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      background: #f8b500;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #d69500;
+    }
+
+    .results {
+      margin-top: 1rem;
+      text-align: center;
+    }
+
+    .incorrect {
+      color: red;
+      font-weight: bold;
+    }
+
+    @media (max-width: 600px) {
+      .sentence, .input-area {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧠 SpeedType</h1>
+    <div class="sentence" id="sentence"></div>
+    <textarea class="input-area" id="input" placeholder="Start typing..." disabled></textarea>
+
+    <div class="buttons">
+      <button onclick="startTest()">Start</button>
+      <button onclick="endTest()">Finish</button>
+      <button onclick="resetTest()">Try Again</button>
+    </div>
+
+    <div class="results" id="results">
+      <p><strong>Time:</strong> <span id="time">0.00</span> seconds</p>
+      <p><strong>WPM:</strong> <span id="wpm">0</span></p>
+      <p><strong>Accuracy:</strong> <span id="accuracy">0%</span></p>
+    </div>
+  </div>
+
+  <script>
+    const sentences = [
+      "The quick brown fox jumps over the lazy dog.",
+      "Typing tests improve your speed and accuracy.",
+      "JavaScript makes web pages interactive.",
+      "Never stop learning and improving yourself.",
+      "Practice typing daily to become faster."
+    ];
+
+    let currentSentence = "";
+    let startTime;
+    let timerInterval;
+
+    const sentenceEl = document.getElementById("sentence");
+    const inputEl = document.getElementById("input");
+    const timeEl = document.getElementById("time");
+    const wpmEl = document.getElementById("wpm");
+    const accuracyEl = document.getElementById("accuracy");
+
+    function startTest() {
+      currentSentence = sentences[Math.floor(Math.random() * sentences.length)];
+      sentenceEl.textContent = currentSentence;
+      inputEl.value = "";
+      inputEl.disabled = false;
+      inputEl.focus();
+      startTime = new Date().getTime();
+      clearInterval(timerInterval);
+      timerInterval = setInterval(updateTimer, 100);
+    }
+
+    function updateTimer() {
+      const now = new Date().getTime();
+      const time = ((now - startTime) / 1000).toFixed(2);
+      timeEl.textContent = time;
+    }
+
+    function endTest() {
+      clearInterval(timerInterval);
+      inputEl.disabled = true;
+      const endTime = new Date().getTime();
+      const totalTime = (endTime - startTime) / 1000;
+      const typedText = inputEl.value.trim();
+      const wordCount = typedText.split(/\s+/).length;
+
+ 
+      const wpm = Math.round((wordCount / totalTime) * 60);
+      wpmEl.textContent = isNaN(wpm) ? 0 : wpm;
+
+
+      let correctChars = 0;
+      const minLen = Math.min(currentSentence.length, typedText.length);
+
+      let highlighted = "";
+      for (let i = 0; i < minLen; i++) {
+        if (currentSentence[i] === typedText[i]) {
+          highlighted += currentSentence[i];
+          correctChars++;
+        } else {
+          highlighted += `<span class="incorrect">${currentSentence[i]}</span>`;
+        }
+      }
+
+
+      highlighted += currentSentence.slice(minLen);
+      sentenceEl.innerHTML = highlighted;
+
+      const accuracy = ((correctChars / currentSentence.length) * 100).toFixed(0);
+      accuracyEl.textContent = `${accuracy}%`;
+    }
+
+    function resetTest() {
+      sentenceEl.textContent = "";
+      inputEl.value = "";
+      inputEl.disabled = true;
+      timeEl.textContent = "0.00";
+      wpmEl.textContent = "0";
+      accuracyEl.textContent = "0%";
+      clearInterval(timerInterval);
+    }
+  </script>
+</body>
+</html>
